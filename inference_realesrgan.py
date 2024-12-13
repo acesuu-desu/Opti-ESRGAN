@@ -149,6 +149,8 @@ def main():
             print('Error', error)
             print('If you encounter CUDA out of memory, try to set --tile with a smaller number.')
         else:
+            output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
+
             if args.ext == 'auto':
                 extension = extension[1:]
             else:
