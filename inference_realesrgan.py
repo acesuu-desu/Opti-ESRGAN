@@ -10,8 +10,6 @@ from basicsr.utils.download_util import load_file_from_url
 from realesrgan import RealESRGANer
 from realesrgan.archs.srvgg_arch import SRVGGNetCompact
 
-cache_file = "opti-cache.json"
-
 saved_counter = 0
 skipped_counter = 0
 error_counter = 0
@@ -49,6 +47,7 @@ def main():
         help=('Model names: RealESRGAN_x4plus | RealESRNet_x4plus | RealESRGAN_x4plus_anime_6B | RealESRGAN_x2plus | '
               'realesr-animevideov3 | realesr-general-x4v3'))
     parser.add_argument('-o', '--output', type=str, default='results', help='Output folder')
+    parser.add_argument('--cache', type=str, help='Add caching')
     parser.add_argument(
         '-dn',
         '--denoise_strength',
@@ -150,7 +149,8 @@ def main():
             arch='clean',
             channel_multiplier=2,
             bg_upsampler=upsampler)
-
+    
+    global cache_file = args.cache
     cache = load_cache()
 
     os.makedirs(args.output, exist_ok=True)
