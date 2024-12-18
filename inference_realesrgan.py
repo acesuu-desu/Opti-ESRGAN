@@ -34,6 +34,9 @@ def save_cache(cache):
         json.dump(cache, f, indent=4)
 
 def main():
+    global saved_counter
+    global skipped_counter
+    global error_counter
     """Inference demo for Real-ESRGAN.
     """
     parser = argparse.ArgumentParser()
