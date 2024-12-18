@@ -17,12 +17,14 @@ def generate_hash(filepath):
     return hashlib.md5(filepath.encode('utf-8')).hexdigest()
 
 def load_cache():
+    global cache_file
     if os.path.exists(cache_file):
         with open(cache_file, 'r') as f:
             return json.load(f)
     return {}
 
-def save_cache(cache, cache_file):
+def save_cache(cache):
+    global cache_file
     """Save the cache to the JSON file."""
     with open(cache_file, 'w') as f:
         json.dump(cache, f, indent=4)
