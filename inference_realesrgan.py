@@ -2,12 +2,30 @@ import argparse
 import cv2
 import glob
 import os
+import json
+import hashlib
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from basicsr.utils.download_util import load_file_from_url
 
 from realesrgan import RealESRGANer
 from realesrgan.archs.srvgg_arch import SRVGGNetCompact
 
+cache_file = "opti-cache.json"
+
+def generate_hash(filepath):
+    """Generate a hash for a file path."""
+    return hashlib.md5(filepath.encode('utf-8')).hexdigest()
+
+def load_cache():
+    if os.path.exists(cache_file):
+        with open(cache_file, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_cache(cache, cache_file):
+    """Save the cache to the JSON file."""
+    with open(cache_file, 'w') as f:
+        json.dump(cache, f, indent=4)
 
 def main():
     """Inference demo for Real-ESRGAN.
@@ -123,6 +141,9 @@ def main():
             arch='clean',
             channel_multiplier=2,
             bg_upsampler=upsampler)
+
+    cache = load_cache()
+
     os.makedirs(args.output, exist_ok=True)
 
     if os.path.isfile(args.input):
@@ -131,6 +152,11 @@ def main():
         paths = sorted(glob.glob(os.path.join(args.input, '*')))
 
     for idx, path in enumerate(paths):
+        hash_key = generate_hash(path)
+        if hash_key in cache:
+            print(f"Skipping {path}, found in cache.")
+            continue
+
         imgname, extension = os.path.splitext(os.path.basename(path))
         print('Testing', idx, imgname)
 
@@ -162,6 +188,10 @@ def main():
             else:
                 save_path = os.path.join(args.output, f'{imgname}_{args.suffix}.{extension}')
             cv2.imwrite(save_path, output)
+
+            cache[hash_key] = save_path
+
+            save_cache(cache)
 
 
 if __name__ == '__main__':
