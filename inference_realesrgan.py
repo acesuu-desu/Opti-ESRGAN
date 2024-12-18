@@ -150,7 +150,8 @@ def main():
             channel_multiplier=2,
             bg_upsampler=upsampler)
     
-    global cache_file = args.cache
+    global cache_file 
+    cache_file = args.cache
     cache = load_cache()
 
     os.makedirs(args.output, exist_ok=True)
