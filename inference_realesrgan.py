@@ -12,6 +12,10 @@ from realesrgan.archs.srvgg_arch import SRVGGNetCompact
 
 cache_file = "opti-cache.json"
 
+saved_counter = 0
+skipped_counter = 0
+error_counter = 0
+
 def generate_hash(filepath):
     """Generate a hash for a file path."""
     return hashlib.md5(filepath.encode('utf-8')).hexdigest()
@@ -154,15 +158,22 @@ def main():
         paths = sorted(glob.glob(os.path.join(args.input, '*')))
 
     for idx, path in enumerate(paths):
-        hash_key = generate_hash(path)
-        if hash_key in cache:
-            print(f"Skipping {path}, found in cache.")
-            continue
+        try:
+            hash_key = generate_hash(path)
+            if hash_key in cache:
+                skipped_counter += 1
+                print(f"[{skipped_counter}] Skipping {path}, found in cache.")
+                continue
 
-        imgname, extension = os.path.splitext(os.path.basename(path))
-        print('Testing', idx, imgname)
+            imgname, extension = os.path.splitext(os.path.basename(path))
+            saved_counter += 1
+            print(f'[{saved_counter}] Testing {idx} {imgname}')
 
+        except Exception as error:
+            error_counter += 1
+            print(f"[{error_counter}] An error occured: {error}")
         img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+        
         if len(img.shape) == 3 and img.shape[2] == 4:
             img_mode = 'RGBA'
         else:
